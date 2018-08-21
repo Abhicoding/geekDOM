@@ -5,7 +5,8 @@ let x = {
     id: '',
     onClick: something()
   },
-  children: [{type: 'p'}]
+  children: [{type: 'p', props:{}, children:[]}, 
+    {type: 'TEXT', props: {nodeValue: 'Foo'}, children:[]}]
 }
 
 function render (element, parentDOM) {
@@ -13,17 +14,22 @@ function render (element, parentDOM) {
   // Attaching event listeners
   const isListener = listener => listener.startsWith('on')
 
-  element.props.filter(value => isListener(value))
+  dom.props.filter(value => isListener(value))
     .forEach(name => dom.addEventListener(name.slice(2).toLowerCase(), props[name]))
 
   // Adding the attributes
-
-  element.props.filter(value => !isListener(value))
+  dom.props.filter(value => !isListener(value))
     .forEach(name => dom.setAttribute(name, props[name]))
 
-  // Recursively appending Child elements to the parent node
+  // Recursively appending child elements to the parent node
   if (element.children.length > 0) {
-    element.children.forEach(child => render(child, dom))
+    element.children.forEach(child => {
+      if (child.type === 'TEXT') {    // Adding text nodes
+        const text = document.createTextNode(child.props.nodeValue)
+        return element.appendChild(text) 
+      }  
+      render(child, dom)
+    })
   }
   parentDOM.appendChild(dom)
 }
