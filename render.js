@@ -14,22 +14,22 @@ function render (element, parentDOM) {
   // Attaching event listeners
   const isListener = listener => listener.startsWith('on')
 
-  dom.props.filter(value => isListener(value))
-    .forEach(name => dom.addEventListener(name.slice(2).toLowerCase(), props[name]))
+  Object.keys(element.props).filter(value => isListener(value))
+    .forEach(name => element.addEventListener(name.slice(2).toLowerCase(), props[name]))
 
   // Adding the attributes
-  dom.props.filter(value => !isListener(value))
-    .forEach(name => dom.setAttribute(name, props[name]))
+  Object.keys(element.props).filter(value => !isListener(value))
+    .forEach(name => dom.setAttribute(name, element.props[name]))
 
   // Recursively appending child elements to the parent node
   if (element.children.length > 0) {
     element.children.forEach(child => {
       if (child.type === 'TEXT') {    // Adding text nodes
         const text = document.createTextNode(child.props.nodeValue)
-        return element.appendChild(text) 
+        return dom.appendChild(text) 
       }  
       render(child, dom)
     })
   }
-  parentDOM.appendChild(dom)
+  return parentDOM.appendChild(dom)
 }
