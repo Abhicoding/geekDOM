@@ -1,0 +1,29 @@
+{
+  "name": "geekdom",
+  "version": "1.0.0",
+  "description": "A minimal ReactJS clone.",
+  "main": "hypertext.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abhicoding/geekDOM.git"
+  },
+  "keywords": [
+    "ReactJS"
+  ],
+  "author": "Abhishek Shingane",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Abhicoding/geekDOM/issues"
+  },
+  "homepage": "https://github.com/Abhicoding/geekDOM#readme",
+  "devDependencies": {
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-register": "^6.26.0"
+  },
+  "dependencies": {}
+}
