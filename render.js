@@ -10,7 +10,7 @@
 //   }
 // }
 
-let previousState = null
+let previousInstance = null
 
 function render (element, parentDOM) { //IN: newVnode, oldVnode, RealDOM OUT:
   const dom = document.createElement(element.type)
@@ -38,25 +38,49 @@ function render (element, parentDOM) { //IN: newVnode, oldVnode, RealDOM OUT:
   return parentDOM.appendChild(dom)
 }
 
-function reco (parentDOM, newVNode, oldVNode) { // IN oldNode, newNode, parent DOM; OUT dom, newVnode
-  let dom
-  newVNode.type === 'TEXT' 
-    ? dom = document.createTextNode(newVNode.props.nodeValue)
-    : dom = document.createElement(newVNode.type)
-  
-  dom = updateDOMProperties(dom, newVNode.props, oldVNode.props,)
-  
+function render () {
 
 }
 
-function updateDOMProperties (dom, newProps, prevProps={}) {
+function reco (parentDOM, element, prevInst) {
+  if (prevInst === null) {
+    const newInstance = instantiate(element)
+    parentDOM.appendChild(newInstance.dom)
+    return newInstance
+  }
+  if (prevInst.element.type === element.type) {
+    updateDOMProperties(prevInst.dom, element.props, prevInst.props, false)
+    prevInst.childInstances = recoChildren (element, prevInst)
+    prevInst.element = element
+    return prevInst
+  }
+  const newInstance = instantiate(element)
+  parentDOM.replaceChild(newInstance.dom, prevInst.dom)
+  return newInstance
+}
+
+
+function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
+  const dom = element.type === 'TEXT' 
+    ? dom = document.createTextNode(element.props.nodeValue)
+    : dom = document.createElement(element.type)
+
+  updateDOMProperties(dom, element.props, {}, false)
+  const childInstances = element.props.children.map(instantiate)
+  const childDOMS = childInstances.map(child => child.dom)
+  childDOMS.forEach(child => dom.appendChild(child))
+
+  return {dom, element, childInstances}
+}
+
+function updateDOMProperties (dom, newProps, prevProps={}, newElement=true) {
   const isListener = listener => listener.startsWith('on')
   const tempObject = Object.assign({}, prevProps, newProps)
   let keys = Object.keys(tempObject).filter(x => x !== 'children')
 
   for (let x of keys) {
     if (x in newProps) {
-      if (newProps[x] === prevProps[x]){
+      if (newProps[x] === prevProps[x] && !newElement){
         continue
       }
       if (!isListener(x)) {
@@ -72,7 +96,17 @@ function updateDOMProperties (dom, newProps, prevProps={}) {
     }
     dom.removeEventLister(x.slice(2).toLowerCase(), prevProps[x])
   }
-  return dom  
+}
+
+function recoChildren(element, previousInstance) {
+  const dom = previousInstance.dom
+  const previousChildInstances = previousInstance.childrenInstances
+  const newChildren = element.props.children
+  let newChildInstances =[]
+  for (let i of newChildren){
+    newChildInstances.push(reco(dom, newChildren[i], previousChildInstances[i]).childInstances)
+  }
+  return newChildInstances
 }
 
 module.exports = render
