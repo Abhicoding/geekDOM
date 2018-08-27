@@ -1,24 +1,13 @@
-// let x = {
-//   type: 'div',
-//   props: {
-//     id: '',
-//     children: [{type: 'p', props:{ children:[{type: 'TEXT', props: {
-//       nodeValue: `When you do it your way you can go anywhere you choose. 
-//       Think about a cloud. Just float around and be there. Be so very light. 
-//       Be a gentle whisper.`}}]}}, 
-//     {type: 'TEXT', props: {nodeValue: 'Foo', children:[]}}]
-//   }
-// }
-
 let rootInstance = null
 
-export function render (element, container) {
+function render (element, container) {
   const prevInst = rootInstance
   const nextInst = reco(container, element, prevInst)
   rootInstance = nextInst
 }
 
 function reco (parentDOM, element, prevInst) {
+  console.log('parentDOM', parentDOM, 'element',element, 'prevInst' ,prevInst)
   if (prevInst === null) {
     const newInstance = instantiate(element)
     parentDOM.appendChild(newInstance.dom)
@@ -51,7 +40,6 @@ function reco (parentDOM, element, prevInst) {
 
 
 function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
-
   if (typeof element.type === 'string') {
     let dom = element.type === 'TEXT' 
       ? dom = document.createTextNode(element.props.nodeValue)
@@ -66,6 +54,7 @@ function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
   const instance = {}
   const publicInstance = componentInstance(element, instance)
   const childElement = publicInstance.render()
+  console.log(childElement, 'logging childElement')
   const childInstance = instantiate(childElement)
   const dom = childInstance.dom
   Object.assign(instance, {dom, element, childInstance, publicInstance})
@@ -75,14 +64,14 @@ function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
 function updateDOMProperties (dom, newProps, prevProps={}, newElement=true) {
   const isListener = listener => listener.startsWith('on')
   const tempObject = Object.assign({}, prevProps, newProps)
-  let keys = Object.keys(tempObject).filter(x => x !== 'children')
-
+  let keys = Object.keys(tempObject).filter(x => x !== 'children' && x !== 'nodeValue')
   for (let x of keys) {
     if (x in newProps) {
       if (newProps[x] === prevProps[x] && !newElement){
         continue
       }
       if (!isListener(x)) {
+        console.log(dom, 'loggin this dom here', x)
         dom.setAttribute(x, newProps[x])
         continue
       }
@@ -108,7 +97,7 @@ function recoChildren(element, previousInstance) {
   return newChildInstances.filter(child => child !== null)
 }
 
-export class Component {
+class Component {
   constructor(props){
     this.props = props
     this.state = this.state || {}
@@ -128,7 +117,61 @@ export class Component {
 
 
 function componentInstance (element, internalInstance) {
-  const publicInstance = new element.type(element.props)
+  console.log(element, 'printing component instance')
+  const {type, props} = element
+  const publicInstance = new type(props)
   publicInstance._internalInstance = internalInstance
   return publicInstance
 }
+
+function h (element, props, ...args) {
+    let vdom = {type: element}
+    props !== null ? vdom.props = props : vdom.props = {}
+    vdom.props.children=[]
+    if (args.length == 0) {
+      return vdom
+    }
+    args.forEach(child => {
+      if (isTextNode(child)) {
+        return vdom.props.children.push(createTextNode(child))
+      }
+      return vdom.props.children.push(child)
+    })
+    return vdom
+  }
+  
+  function isTextNode (node){
+    return !(node instanceof Object)
+  }
+  
+  function createTextNode (value) {
+    return {type: 'TEXT', props: {nodeValue: value, children:[]}}
+  }
+
+// @jsx h
+
+class Test extends Component {
+  constructor () {
+    super()
+    this.state = {
+      count: 0
+    }
+    this.increase = this.increase.bind(this)
+  }
+
+  increase () {
+    this.setState({count: this.state.count + 1})
+    console.log('this ran', this.state.count)
+  }
+    render() {
+      return (
+        <div>
+          <h1>Test component</h1>
+          <p>{this.state.count}</p>
+          <button onClick={this.increase}>Increase</button>
+        </div>
+      )
+    }
+  }
+  
+render (<Test/>, document.getElementById('root'))

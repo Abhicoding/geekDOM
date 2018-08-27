@@ -1,5 +1,3 @@
-require('babel-register')({
-    "presets":["env", "react"] 
-  })
+require('babel-register')
 
-require('./test')
+let x = require('./test/component').default

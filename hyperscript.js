@@ -19,7 +19,7 @@ function isTextNode (node){
 }
 
 function createTextNode (value) {
-  return {type: 'TEXT', props: {nodeValue: value}}
+  return {type: 'TEXT', props: {nodeValue: value, children:[]}}
 }
 
 
