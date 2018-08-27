@@ -1,4 +1,4 @@
-function h (element, props, ...args) {
+export default function h (element, props, ...args) {
   let vdom = {type: element}
   props !== null ? vdom.props = props : vdom.props = {}
   vdom.props.children=[]
@@ -21,6 +21,3 @@ function isTextNode (node){
 function createTextNode (value) {
   return {type: 'TEXT', props: {nodeValue: value, children:[]}}
 }
-
-
-module.exports = h

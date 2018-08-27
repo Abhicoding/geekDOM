@@ -1,6 +1,6 @@
 // @jsx h
 
-import h from '../hyperscript'
+import h from '../src/hyperscript'
 
 let x = (<div>
   <ul class='listicle'>
