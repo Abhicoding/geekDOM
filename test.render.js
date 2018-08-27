@@ -17,42 +17,41 @@ function render(element, container) {
 }
 
 function reco(parentDOM, element, prevInst) {
-  console.log('parentDOM', parentDOM, 'element', element, 'prevInst', prevInst);
   if (prevInst === null) {
     var newInstance = instantiate(element);
     parentDOM.appendChild(newInstance.dom);
     return newInstance;
   }
   if (!element) {
-    parentDOM.removechild(prevInst.element);
+    console.log(element, prevInst, '???'); // problem is happening here
+    parentDOM.removeChild(prevInst.dom);
     return null;
   }
-  if (prevInst.element.type === element.type) {
+  if (prevInst.element.type !== element.type) {
+    var _newInstance = instantiate(element);
+    parentDOM.replaceChild(_newInstance.dom, prevInstdom);
+    return _newInstance;
+  }
+  if (typeof element.type === 'string') {
     updateDOMProperties(prevInst.dom, element.props, prevInst.props, false);
     prevInst.childInstances = recoChildren(element, prevInst);
     prevInst.element = element;
     return prevInst;
   }
-  if (typeof element.type === 'string') {
-    var _newInstance = instantiate(element);
-    parentDOM.replaceChild(_newInstance.dom, prevInst.dom);
-    return _newInstance;
-  }
-  instance.publicInstance.props = element.props;
-  var childElement = instance.publicInstance.render();
-  var oldChildInstance = instance.childInstance;
-  var childInstance = reco(parentDOM, oldChildInstance, childElement);
-  instance.dom = childInstance.dom;
-  instance.childInstance = childInstance;
-  instance.element = element;
-  return instance;
+  prevInst.publicInstance.props = element.props;
+  var childElement = prevInst.publicInstance.render();
+  var oldChildInstance = prevInst.childInstance;
+  var childInstance = reco(parentDOM, childElement, oldChildInstance);
+  prevInst.dom = childInstance.dom;
+  prevInst.childInstance = childInstance;
+  prevInst.element = element;
+  return prevInst;
 }
 
 function instantiate(element) {
   // IN element, parent DOM; OUT dom, newVnode
   if (typeof element.type === 'string') {
     var _dom = element.type === 'TEXT' ? _dom = document.createTextNode(element.props.nodeValue) : _dom = document.createElement(element.type);
-
     updateDOMProperties(_dom, element.props, {}, false);
     var childInstances = element.props.children.map(instantiate);
     var childDOMS = childInstances.map(function (child) {
@@ -66,7 +65,6 @@ function instantiate(element) {
   var instance = {};
   var publicInstance = componentInstance(element, instance);
   var childElement = publicInstance.render();
-  console.log(childElement, 'logging childElement');
   var childInstance = instantiate(childElement);
   var dom = childInstance.dom;
   Object.assign(instance, { dom: dom, element: element, childInstance: childInstance, publicInstance: publicInstance });
@@ -82,8 +80,8 @@ function updateDOMProperties(dom, newProps) {
   };
   var tempObject = Object.assign({}, prevProps, newProps);
   var keys = Object.keys(tempObject).filter(function (x) {
-    return x !== 'children' && x !== 'nodeValue';
-  });
+    return x !== 'children';
+  }); //May be you are not updating node value
   var _iteratorNormalCompletion = true;
   var _didIteratorError = false;
   var _iteratorError = undefined;
@@ -96,12 +94,19 @@ function updateDOMProperties(dom, newProps) {
         if (newProps[x] === prevProps[x] && !newElement) {
           continue;
         }
+        if (x === 'nodeValue') {
+          dom.textContent = newProps[x];
+          continue;
+        }
         if (!isListener(x)) {
-          console.log(dom, 'loggin this dom here', x);
           dom.setAttribute(x, newProps[x]);
           continue;
         }
         dom.addEventListener(x.slice(2).toLowerCase(), newProps[x]);
+        continue;
+      }
+      if (x === 'nodeValue') {
+        dom.textContent = '';
         continue;
       }
       if (!isListener(x)) {
@@ -127,12 +132,13 @@ function updateDOMProperties(dom, newProps) {
 }
 
 function recoChildren(element, previousInstance) {
+  console.log(element, previousInstance, 'The answer lies here');
   var dom = previousInstance.dom;
-  var previousChildInstances = previousInstance.childInstance;
-  var newChildren = element.props.children;
+  var previousChildInstances = previousInstance.childInstances;
+  var newChildren = element.props.children; // This is passing undefined
   var newChildInstances = [];
   for (var i = 0, j = Math.max(newChildren.length, previousChildInstances.length); i < j; i++) {
-    newChildInstances.push(reco(dom, newChildren[i], previousChildInstances[i]).childInstance);
+    newChildInstances.push(reco(dom, newChildren[i], previousChildInstances[i]));
   }
   return newChildInstances.filter(function (child) {
     return child !== null;
@@ -151,6 +157,7 @@ var Component = function () {
     key: 'setState',
     value: function setState(update) {
       this.state = Object.assign({}, this.state, update);
+      console.log(this._internalInstance, 'printing internalinst');
       this.updateInstance(this._internalInstance);
     }
   }, {
@@ -166,7 +173,6 @@ var Component = function () {
 }();
 
 function componentInstance(element, internalInstance) {
-  console.log(element, 'printing component instance');
   var type = element.type,
       props = element.props;
 
@@ -230,6 +236,7 @@ var Test = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
+      console.log(this._internalInstance, 'printing initial internal instance');
       return h(
         'div',
         null,

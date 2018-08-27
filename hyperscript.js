@@ -15,7 +15,7 @@ function h (element, props, ...args) {
 }
 
 function isTextNode (node){
-  return typeof node === 'string'
+  return !(node instanceof Object)
 }
 
 function createTextNode (value) {

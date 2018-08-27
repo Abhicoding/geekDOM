@@ -12,7 +12,7 @@
 
 let rootInstance = null
 
-export function render (element, container) {
+function render (element, container) {
   const prevInst = rootInstance
   const nextInst = reco(container, element, prevInst)
   rootInstance = nextInst
@@ -25,38 +25,35 @@ function reco (parentDOM, element, prevInst) {
     return newInstance
   }
   if (!element) {
-    parentDOM.removechild(prevInst.element)
+    parentDOM.removeChild(prevInst.dom)
     return null
   }
-  if (prevInst.element.type === element.type) {
+  if (prevInst.element.type !== element.type) {
+    const newInstance = instantiate(element)
+    parentDOM.replaceChild(newInstance.dom, prevInstdom)
+    return newInstance
+  }
+  if (typeof element.type === 'string') {
     updateDOMProperties(prevInst.dom, element.props, prevInst.props, false)
     prevInst.childInstances = recoChildren (element, prevInst)
     prevInst.element = element
     return prevInst
   }
-  if (typeof element.type === 'string') {
-    const newInstance = instantiate(element)
-    parentDOM.replaceChild(newInstance.dom, prevInst.dom)
-    return newInstance
-  }
-  instance.publicInstance.props = element.props
-  const childElement = instance.publicInstance.render()
-  const oldChildInstance = instance.childInstance
-  const childInstance = reco(parentDOM, oldChildInstance, childElement)
-  instance.dom = childInstance.dom
-  instance.childInstance= childInstance
-  instance.element = element
-  return instance
+  prevInst.publicInstance.props = element.props
+  const childElement = prevInst.publicInstance.render()
+  const oldChildInstance = prevInst.childInstance
+  const childInstance = reco(parentDOM, childElement,oldChildInstance)
+  prevInst.dom = childInstance.dom
+  prevInst.childInstance= childInstance
+  prevInst.element = element
+  return prevInst
 }
 
-
 function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
-
   if (typeof element.type === 'string') {
     let dom = element.type === 'TEXT' 
       ? dom = document.createTextNode(element.props.nodeValue)
       : dom = document.createElement(element.type)
-
     updateDOMProperties(dom, element.props, {}, false)
     const childInstances = element.props.children.map(instantiate)
     const childDOMS = childInstances.map(child => child.dom)
@@ -75,11 +72,14 @@ function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
 function updateDOMProperties (dom, newProps, prevProps={}, newElement=true) {
   const isListener = listener => listener.startsWith('on')
   const tempObject = Object.assign({}, prevProps, newProps)
-  let keys = Object.keys(tempObject).filter(x => x !== 'children')
-
+  let keys = Object.keys(tempObject).filter(x => x !== 'children') //May be you are not updating node value
   for (let x of keys) {
     if (x in newProps) {
       if (newProps[x] === prevProps[x] && !newElement){
+        continue
+      }
+      if (x === 'nodeValue') {
+        dom.textContent = newProps[x]
         continue
       }
       if (!isListener(x)) {
@@ -87,6 +87,10 @@ function updateDOMProperties (dom, newProps, prevProps={}, newElement=true) {
         continue
       }
       dom.addEventListener(x.slice(2).toLowerCase(), newProps[x])
+      continue
+    }
+    if (x === 'nodeValue') {
+      dom.textContent = ''
       continue
     }
     if (!isListener(x)) {
@@ -99,16 +103,16 @@ function updateDOMProperties (dom, newProps, prevProps={}, newElement=true) {
 
 function recoChildren(element, previousInstance) {
   const dom = previousInstance.dom
-  const previousChildInstances = previousInstance.childInstance
+  const previousChildInstances = previousInstance.childInstances
   const newChildren = element.props.children
   let newChildInstances =[]
   for (let i=0, j = Math.max(newChildren.length, previousChildInstances.length); i < j; i++){
-    newChildInstances.push(reco(dom, newChildren[i], previousChildInstances[i]).childInstance)
+    newChildInstances.push(reco(dom, newChildren[i], previousChildInstances[i]))
   }
   return newChildInstances.filter(child => child !== null)
 }
 
-export class Component {
+class Component {
   constructor(props){
     this.props = props
     this.state = this.state || {}
@@ -116,6 +120,7 @@ export class Component {
 
   setState (update) {
     this.state = Object.assign({}, this.state, update)
+    console.log(this._internalInstance, 'printing internalinst')
     this.updateInstance(this._internalInstance)
   }
 
@@ -128,7 +133,8 @@ export class Component {
 
 
 function componentInstance (element, internalInstance) {
-  const publicInstance = new element.type(element.props)
+  const {type, props} = element
+  const publicInstance = new type(props)
   publicInstance._internalInstance = internalInstance
   return publicInstance
 }
