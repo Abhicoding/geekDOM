@@ -53,7 +53,7 @@ function instantiate (element) {
   }
   const instance = {}
   const publicInstance = componentInstance(element, instance)
-  const childElement = publicInstance.render()
+  const childElement = publicInstance.type ? publicInstance : publicInstance.render()
   const childInstance = instantiate(childElement)
   const dom = childInstance.dom
   Object.assign(instance, {dom, element, childInstance, publicInstance})

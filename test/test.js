@@ -13,7 +13,6 @@ function reco (parentDOM, element, prevInst) {
     return newInstance
   }
   if (!element) {
-    console.log(element, prevInst, '???') // problem is happening here
     parentDOM.removeChild(prevInst.dom)
     return null
   }
@@ -52,7 +51,7 @@ function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
   }
   const instance = {}
   const publicInstance = componentInstance(element, instance)
-  const childElement = publicInstance.render()
+  const childElement = publicInstance.type ? publicInstance :publicInstance.render()
   const childInstance = instantiate(childElement)
   const dom = childInstance.dom
   Object.assign(instance, {dom, element, childInstance, publicInstance})
@@ -92,7 +91,6 @@ function updateDOMProperties (dom, newProps, prevProps={}, newElement=true) {
 }
 
 function recoChildren(element, previousInstance) {
-  console.log(element, previousInstance, 'The answer lies here')
   const dom = previousInstance.dom
   const previousChildInstances = previousInstance.childInstances
   const newChildren = element.props.children // This is passing undefined
@@ -111,7 +109,6 @@ class Component {
 
   setState (update) {
     this.state = Object.assign({}, this.state, update)
-    console.log(this._internalInstance, 'printing internalinst')
     this.updateInstance(this._internalInstance)
   }
 
@@ -157,28 +154,43 @@ function h (element, props, ...args) {
 // @jsx h
 
 class Test extends Component {
-  constructor () {
-    super()
-    this.state = {
-      count: 0
+  render() {
+    return (
+      <div>
+        <Head/>
+        <Body/>
+      </div>
+    )
+  }
+}
+
+const Head = () => {
+  return (
+    <h1>Test component</h1>
+  )
+}
+
+class Body extends Component {
+  constructor() {
+    super ()
+    this.state ={
+      count:0
     }
     this.increase = this.increase.bind(this)
   }
-
+  
   increase () {
     this.setState({count: this.state.count + 1})
-    console.log('this ran', this.state.count)
   }
-    render() {
-      console.log(this._internalInstance, 'printing initial internal instance')
-      return (
-        <div>
-          <h1>Test component</h1>
-          <p>{this.state.count}</p>
-          <button onClick={this.increase}>Increase</button>
-        </div>
-      )
-    }
+
+  render () {
+    return (
+      <div>
+        <p>{this.state.count}</p>
+        <button onClick={this.increase}>Increase</button>
+      </div>
+    )
   }
+}
   
 render (<Test/>, document.getElementById('root'))

@@ -23,7 +23,6 @@ function reco(parentDOM, element, prevInst) {
     return newInstance;
   }
   if (!element) {
-    console.log(element, prevInst, '???'); // problem is happening here
     parentDOM.removeChild(prevInst.dom);
     return null;
   }
@@ -64,7 +63,7 @@ function instantiate(element) {
   }
   var instance = {};
   var publicInstance = componentInstance(element, instance);
-  var childElement = publicInstance.render();
+  var childElement = publicInstance.type ? publicInstance : publicInstance.render();
   var childInstance = instantiate(childElement);
   var dom = childInstance.dom;
   Object.assign(instance, { dom: dom, element: element, childInstance: childInstance, publicInstance: publicInstance });
@@ -132,7 +131,6 @@ function updateDOMProperties(dom, newProps) {
 }
 
 function recoChildren(element, previousInstance) {
-  console.log(element, previousInstance, 'The answer lies here');
   var dom = previousInstance.dom;
   var previousChildInstances = previousInstance.childInstances;
   var newChildren = element.props.children; // This is passing undefined
@@ -157,7 +155,6 @@ var Component = function () {
     key: 'setState',
     value: function setState(update) {
       this.state = Object.assign({}, this.state, update);
-      console.log(this._internalInstance, 'printing internalinst');
       this.updateInstance(this._internalInstance);
     }
   }, {
@@ -218,33 +215,58 @@ var Test = function (_Component) {
   function Test() {
     _classCallCheck(this, Test);
 
-    var _this = _possibleConstructorReturn(this, (Test.__proto__ || Object.getPrototypeOf(Test)).call(this));
-
-    _this.state = {
-      count: 0
-    };
-    _this.increase = _this.increase.bind(_this);
-    return _this;
+    return _possibleConstructorReturn(this, (Test.__proto__ || Object.getPrototypeOf(Test)).apply(this, arguments));
   }
 
   _createClass(Test, [{
+    key: 'render',
+    value: function render() {
+      return h(
+        'div',
+        null,
+        h(Head, null),
+        h(Body, null)
+      );
+    }
+  }]);
+
+  return Test;
+}(Component);
+
+var Head = function Head() {
+  return h(
+    'h1',
+    null,
+    'Test component'
+  );
+};
+
+var Body = function (_Component2) {
+  _inherits(Body, _Component2);
+
+  function Body() {
+    _classCallCheck(this, Body);
+
+    var _this2 = _possibleConstructorReturn(this, (Body.__proto__ || Object.getPrototypeOf(Body)).call(this));
+
+    _this2.state = {
+      count: 0
+    };
+    _this2.increase = _this2.increase.bind(_this2);
+    return _this2;
+  }
+
+  _createClass(Body, [{
     key: 'increase',
     value: function increase() {
       this.setState({ count: this.state.count + 1 });
-      console.log('this ran', this.state.count);
     }
   }, {
     key: 'render',
     value: function render() {
-      console.log(this._internalInstance, 'printing initial internal instance');
       return h(
         'div',
         null,
-        h(
-          'h1',
-          null,
-          'Test component'
-        ),
         h(
           'p',
           null,
@@ -259,7 +281,7 @@ var Test = function (_Component) {
     }
   }]);
 
-  return Test;
+  return Body;
 }(Component);
 
 render(h(Test, null), document.getElementById('root'));
