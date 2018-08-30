@@ -1,5 +1,5 @@
-import {updateDOMProperties} from './dom-utilities'
-import {componentInstance} from './component'
+const updateDOMProperties = require('./dom-utilities').default
+const componentInstance = require('./component').componentInstance
 
 let rootInstance = null
 
@@ -42,7 +42,7 @@ export function reco (parentDOM, element, prevInst) {
 
 function instantiate (element) {
   if (typeof element.type === 'string') {
-    let dom = element.type === 'TEXT' 
+    var dom = element.type === 'TEXT' 
       ? dom = document.createTextNode(element.props.nodeValue)
       : dom = document.createElement(element.type)
     updateDOMProperties(dom, element.props, {}, false)
@@ -55,7 +55,7 @@ function instantiate (element) {
   const publicInstance = componentInstance(element, instance)
   const childElement = publicInstance.type ? publicInstance : publicInstance.render()
   const childInstance = instantiate(childElement)
-  const dom = childInstance.dom
+  var dom = childInstance.dom
   Object.assign(instance, {dom, element, childInstance, publicInstance})
   return instance
 }

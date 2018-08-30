@@ -1,4 +1,4 @@
-import {reco} from './reco-render'
+const reco = require('./reco-render').reco
 
 export class Component {
     constructor(props){

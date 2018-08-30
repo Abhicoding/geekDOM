@@ -1,7 +1,5 @@
-require('babel-register')
+const render = require('./src/reco-render').render
+const h = require('./src/hyperscript').default
+const Component = require('./src/component').Component
 
-let x = require('./test/component').default
-
-let y = require('./test/test_2').default
-
-console.log(y)
+export {render, h, Component}
