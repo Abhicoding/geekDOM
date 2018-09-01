@@ -28,7 +28,7 @@ function reco(parentDOM, element, prevInst) {
   }
   if (prevInst.element.type !== element.type) {
     var _newInstance = instantiate(element);
-    parentDOM.replaceChild(_newInstance.dom, prevInstdom);
+    parentDOM.replaceChild(_newInstance.dom, prevInst.dom);
     return _newInstance;
   }
   if (typeof element.type === 'string') {
@@ -249,14 +249,7 @@ var Head = function Head() {
       'h1',
       null,
       'Test component'
-    ),
-    ['One', 'Two', 'Three'].map(function (x) {
-      return h(
-        'h3',
-        null,
-        x
-      );
-    })
+    )
   );
 };
 
@@ -269,7 +262,8 @@ var Body = function (_Component2) {
     var _this2 = _possibleConstructorReturn(this, (Body.__proto__ || Object.getPrototypeOf(Body)).call(this));
 
     _this2.state = {
-      count: 0
+      count: 0,
+      toggle: false
     };
     _this2.increase = _this2.increase.bind(_this2);
     return _this2;
@@ -278,7 +272,10 @@ var Body = function (_Component2) {
   _createClass(Body, [{
     key: 'increase',
     value: function increase() {
-      this.setState({ count: this.state.count + 1 });
+      this.setState({
+        count: this.state.count + 1,
+        toggle: !this.state.toggle
+      });
     }
   }, {
     key: 'render',
@@ -290,6 +287,15 @@ var Body = function (_Component2) {
           'p',
           null,
           this.state.count
+        ),
+        this.state.toggle ? h(
+          'h1',
+          null,
+          'Hello'
+        ) : h(
+          'h2',
+          null,
+          'World'
         ),
         h(
           'button',

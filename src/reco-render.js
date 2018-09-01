@@ -21,7 +21,7 @@ export function reco (parentDOM, element, prevInst) {
   }
   if (prevInst.element.type !== element.type) {
     const newInstance = instantiate(element)
-    parentDOM.replaceChild(newInstance.dom, prevInstdom)
+    parentDOM.replaceChild(newInstance.dom, prevInst.dom)
     return newInstance
   }
   if (typeof element.type === 'string') {

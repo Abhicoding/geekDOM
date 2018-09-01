@@ -18,7 +18,7 @@ function reco (parentDOM, element, prevInst) {
   }
   if (prevInst.element.type !== element.type) {
     const newInstance = instantiate(element)
-    parentDOM.replaceChild(newInstance.dom, prevInstdom)
+    parentDOM.replaceChild(newInstance.dom, prevInst.dom)
     return newInstance
   }
   if (typeof element.type === 'string') {
@@ -178,28 +178,31 @@ const Head = () => {
   return (
     <div>
       <h1>Test component</h1>
-      {['One', 'Two', 'Three'].map(x => <h3>{x}</h3>)}
     </div>
   )
 }
-
 class Body extends Component {
   constructor() {
     super ()
     this.state ={
-      count:0
+      count:0,
+      toggle: false
     }
     this.increase = this.increase.bind(this)
   }
   
   increase () {
-    this.setState({count: this.state.count + 1})
+    this.setState({
+      count: this.state.count + 1,
+      toggle: !this.state.toggle
+    })
   }
 
   render () {
     return (
       <div>
         <p>{this.state.count}</p>
+        {this.state.toggle ? <h1>Hello</h1> : <h2>World</h2>}
         <button onClick={this.increase}>Increase</button>
       </div>
     )
