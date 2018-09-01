@@ -5,13 +5,21 @@ export default function h (element, props, ...args) {
   if (args.length == 0) {
     return vdom
   }
-  args.forEach(child => {
-    if (isTextNode(child)) {
-      return vdom.props.children.push(createTextNode(child))
-    }
-    return vdom.props.children.push(child)
-  })
+  vdom = addChildtoVdom(vdom, args)
   return vdom
+}
+
+function addChildtoVdom (vDom, childArray) {
+  childArray.forEach(child => {
+    if (isTextNode(child)) {
+      return vDom.props.children.push(createTextNode(child))
+    }
+    if (Array.isArray(child)) {
+      return addChildtoVdom(vDom,child)
+    }
+    return vDom.props.children.push(child)
+  })
+  return vDom
 }
 
 function isTextNode (node){

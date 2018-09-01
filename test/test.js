@@ -134,22 +134,32 @@ function h (element, props, ...args) {
     if (args.length == 0) {
       return vdom
     }
-    args.forEach(child => {
-      if (isTextNode(child)) {
-        return vdom.props.children.push(createTextNode(child))
-      }
-      return vdom.props.children.push(child)
-    })
+    vdom = addChildtoVdom(vdom, args)
     return vdom
-  }
+}
+
+function addChildtoVdom (vDom, childArray) {
+  childArray.forEach(child => {
+    if (isTextNode(child)) {
+      return vDom.props.children.push(createTextNode(child))
+    }
+    if (Array.isArray(child)) {
+      return addChildtoVdom(vDom,child)
+    }
+    return vDom.props.children.push(child)
+  })
+  return vDom
+}
+
+
   
-  function isTextNode (node){
-    return !(node instanceof Object)
-  }
-  
-  function createTextNode (value) {
-    return {type: 'TEXT', props: {nodeValue: value, children:[]}}
-  }
+function isTextNode (node){
+  return !(node instanceof Object)
+}
+
+function createTextNode (value) {
+  return {type: 'TEXT', props: {nodeValue: value, children:[]}}
+}
 
 // @jsx h
 
@@ -166,7 +176,10 @@ class Test extends Component {
 
 const Head = () => {
   return (
-    <h1>Test component</h1>
+    <div>
+      <h1>Test component</h1>
+      {['One', 'Two', 'Three'].map(x => <h3>{x}</h3>)}
+    </div>
   )
 }
 

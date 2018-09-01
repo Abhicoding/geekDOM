@@ -1,11 +1,11 @@
 {
   "name": "geekdom",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A minimal ReactJS clone.",
   "main": "src/geekdom.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node test.js"
+    "build": "babel test/test.js -o test/test.render.js -w"
   },
   "repository": {
     "type": "git",
