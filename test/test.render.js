@@ -38,7 +38,8 @@ function reco(parentDOM, element, prevInst) {
     return prevInst;
   }
   prevInst.publicInstance.props = element.props;
-  var childElement = prevInst.publicInstance.render();
+  console.log(prevInst.publicInstance, '***prevInst***');
+  var childElement = prevInst.publicInstance.render ? prevInst.publicInstance.render() : prevInst.element;
   var oldChildInstance = prevInst.childInstance;
   var childInstance = reco(parentDOM, childElement, oldChildInstance);
   prevInst.dom = childInstance.dom;
@@ -63,7 +64,7 @@ function instantiate(element) {
   }
   var instance = {};
   var publicInstance = componentInstance(element, instance);
-  var childElement = publicInstance.type ? publicInstance : publicInstance.render();
+  var childElement = publicInstance.render ? publicInstance.render() : publicInstance;
   var childInstance = instantiate(childElement);
   var dom = childInstance.dom;
   Object.assign(instance, { dom: dom, element: element, childInstance: childInstance, publicInstance: publicInstance });
@@ -297,16 +298,25 @@ var Body = function (_Component2) {
           null,
           'World'
         ),
-        h(
-          'button',
-          { onClick: this.increase },
-          'Increase'
-        )
+        h(Button, { increase: this.increase, value: 'Increase' })
       );
     }
   }]);
 
   return Body;
 }(Component);
+
+var Button = function Button(_ref) {
+  var increase = _ref.increase,
+      value = _ref.value;
+
+  return h(
+    'div',
+    { onClick: increase },
+    value
+  );
+};
+
+// console.log(Button, '***logging at the bottom***')
 
 render(h(Test, null), document.getElementById('root'));

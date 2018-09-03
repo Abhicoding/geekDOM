@@ -31,7 +31,7 @@ export function reco (parentDOM, element, prevInst) {
     return prevInst
   }
   prevInst.publicInstance.props = element.props
-  const childElement = prevInst.publicInstance.render()
+  const childElement = prevInst.publicInstance.render ? prevInst.publicInstance.render() : prevInst.element
   const oldChildInstance = prevInst.childInstance
   const childInstance = reco(parentDOM, childElement,oldChildInstance)
   prevInst.dom = childInstance.dom
@@ -40,9 +40,9 @@ export function reco (parentDOM, element, prevInst) {
   return prevInst
 }
 
-function instantiate (element) {
+function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
   if (typeof element.type === 'string') {
-    var dom = element.type === 'TEXT' 
+    let dom = element.type === 'TEXT' 
       ? dom = document.createTextNode(element.props.nodeValue)
       : dom = document.createElement(element.type)
     updateDOMProperties(dom, element.props, {}, false)
@@ -53,9 +53,9 @@ function instantiate (element) {
   }
   const instance = {}
   const publicInstance = componentInstance(element, instance)
-  const childElement = publicInstance.type ? publicInstance : publicInstance.render()
+  const childElement = publicInstance.render ? publicInstance.render() : publicInstance
   const childInstance = instantiate(childElement)
-  var dom = childInstance.dom
+  const dom = childInstance.dom
   Object.assign(instance, {dom, element, childInstance, publicInstance})
   return instance
 }

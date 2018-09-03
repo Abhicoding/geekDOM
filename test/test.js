@@ -28,7 +28,8 @@ function reco (parentDOM, element, prevInst) {
     return prevInst
   }
   prevInst.publicInstance.props = element.props
-  const childElement = prevInst.publicInstance.render()
+  console.log(prevInst.publicInstance, '***prevInst***')
+  const childElement = prevInst.publicInstance.render ? prevInst.publicInstance.render() : prevInst.element
   const oldChildInstance = prevInst.childInstance
   const childInstance = reco(parentDOM, childElement,oldChildInstance)
   prevInst.dom = childInstance.dom
@@ -51,7 +52,7 @@ function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
   }
   const instance = {}
   const publicInstance = componentInstance(element, instance)
-  const childElement = publicInstance.type ? publicInstance :publicInstance.render()
+  const childElement = publicInstance.render ? publicInstance.render() : publicInstance
   const childInstance = instantiate(childElement)
   const dom = childInstance.dom
   Object.assign(instance, {dom, element, childInstance, publicInstance})
@@ -118,7 +119,6 @@ class Component {
     reco (parentDOM, element, internalInstance)
   }
 }
-
 
 function componentInstance (element, internalInstance) {
   const {type, props} = element
@@ -203,10 +203,18 @@ class Body extends Component {
       <div>
         <p>{this.state.count}</p>
         {this.state.toggle ? <h1>Hello</h1> : <h2>World</h2>}
-        <button onClick={this.increase}>Increase</button>
+        <Button increase={this.increase} value={'Increase'} />
       </div>
     )
   }
 }
+
+const Button = ({increase, value}) => {
+  return (
+    <div  onClick={increase}>{value}</div>
+  )
+}
+
+// console.log(Button, '***logging at the bottom***')
   
-render (<Test/>, document.getElementById('root'))
+render (<Test />, document.getElementById('root'))
