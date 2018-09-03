@@ -31,7 +31,7 @@ function reco (parentDOM, element, prevInst) {
   console.log(prevInst.publicInstance, '***prevInst***')
   const childElement = prevInst.publicInstance.render ? prevInst.publicInstance.render() : prevInst.element
   const oldChildInstance = prevInst.childInstance
-  const childInstance = reco(parentDOM, childElement,oldChildInstance)
+  const childInstance = reco(parentDOM, childElement, oldChildInstance)
   prevInst.dom = childInstance.dom
   prevInst.childInstance= childInstance
   prevInst.element = element
@@ -123,6 +123,7 @@ class Component {
 function componentInstance (element, internalInstance) {
   const {type, props} = element
   const publicInstance = new type(props)
+  console.log('***componentInstance****', element,'*', internalInstance, '*', publicInstance)
   publicInstance._internalInstance = internalInstance
   return publicInstance
 }
@@ -214,7 +215,5 @@ const Button = ({increase, value}) => {
     <div  onClick={increase}>{value}</div>
   )
 }
-
-// console.log(Button, '***logging at the bottom***')
   
 render (<Test />, document.getElementById('root'))

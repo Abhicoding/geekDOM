@@ -18,10 +18,14 @@ export class Component {
     }
   }
   
-  
   export function componentInstance (element, internalInstance) {
     const {type, props} = element
-    const publicInstance = new type(props)
+    var publicInstance
+    try {
+      publicInstance = new type(props)
+    } catch {
+      publicInstance = type(props)
+    }
     publicInstance._internalInstance = internalInstance
     return publicInstance
   }

@@ -175,6 +175,7 @@ function componentInstance(element, internalInstance) {
       props = element.props;
 
   var publicInstance = new type(props);
+  console.log('***componentInstance****', element, '*', internalInstance, '*', publicInstance);
   publicInstance._internalInstance = internalInstance;
   return publicInstance;
 }
@@ -316,7 +317,5 @@ var Button = function Button(_ref) {
     value
   );
 };
-
-// console.log(Button, '***logging at the bottom***')
 
 render(h(Test, null), document.getElementById('root'));

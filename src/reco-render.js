@@ -40,11 +40,14 @@ export function reco (parentDOM, element, prevInst) {
   return prevInst
 }
 
-function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
+function instantiate (element) { // IN element; OUT newVnode
+  var dom
   if (typeof element.type === 'string') {
-    let dom = element.type === 'TEXT' 
-      ? dom = document.createTextNode(element.props.nodeValue)
-      : dom = document.createElement(element.type)
+    if (element.type === 'TEXT') {
+      dom = document.createTextNode(element.props.nodeValue)
+    } else {
+      dom = document.createElement(element.type)
+    }
     updateDOMProperties(dom, element.props, {}, false)
     const childInstances = element.props.children.map(instantiate)
     const childDOMS = childInstances.map(child => child.dom)
@@ -55,7 +58,7 @@ function instantiate (element) { // IN element, parent DOM; OUT dom, newVnode
   const publicInstance = componentInstance(element, instance)
   const childElement = publicInstance.render ? publicInstance.render() : publicInstance
   const childInstance = instantiate(childElement)
-  const dom = childInstance.dom
+  dom = childInstance.dom
   Object.assign(instance, {dom, element, childInstance, publicInstance})
   return instance
 }
