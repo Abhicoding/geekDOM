@@ -8,6 +8,8 @@ Created my own implementation of react with some additions to Rodrigo Pombo's ve
 <li> Array of children inside the jsx javascript.</li>
 </ul>
 
+<a href="https://github.com/Abhicoding/geekCalc">A test app was built using this.</a>
+
 <h3>How to install :</h3>
 <p>
   Run 
