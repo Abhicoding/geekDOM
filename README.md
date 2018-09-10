@@ -34,7 +34,7 @@ Created my own implementation of react with some additions to Rodrigo Pombo's ve
 <h3>Usage Pointers</h3>
 <ul>
   <li>
-    Write the code as you would in React. The class for tags is written as it is.
+    Write the code as you would in React. The class attribute in jsx is written as it is.
   </li>
   <li>
     The value attribute for tags is written as it is.
